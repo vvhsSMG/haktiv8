@@ -1,0 +1,12 @@
+streamlit==1.48.1
+pandas==2.3.1
+pydeck==0.9.1
+requests==2.32.4
+google-genai==1.30.0
+langchain==0.3.27
+langchain-core==0.3.74
+langchain-community==0.3.27
+langchain-google-genai==2.1.9
+langgraph==0.2.76
+python-dotenv==1.1.1
+pydantic==2.11.7
