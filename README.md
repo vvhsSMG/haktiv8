@@ -1,96 +1,62 @@
-Routing Bot (Chat)
+🧭 Routing Bot (Chat)
 
-A Streamlit chatbot that plans routes between geographic coordinates using OSRM for routing, optionally optimizes stop order, produces a time-aware itinerary, renders the route on a pydeck map, and generates Google Maps navigation links. It’s driven by a Gemini-powered LLM that guides the user step-by-step or accepts free-form inputs.
+A Streamlit chatbot that plans routes between geographic coordinates using OSRM. It can optionally optimize stop order, builds a time-aware itinerary, renders the route on a pydeck map (Light/Dark themes), and generates Google Maps navigation links. Powered by a Gemini LLM that guides users step-by-step or accepts free-form inputs.
 
-Features
+✨ Features
 
-Conversational planner: Collects start/end (or loop-back), stops with stay times, travel mode, and departure time.
+Conversational planner
+Collects start/end (or loop-back), stops with stay times, travel mode, and departure time.
 
-OSRM integration:
+OSRM integration
 
-/route to build the path and compute leg distances/times.
+/route → path geometry + leg distances & times
 
-/trip to optimize stop order (keeps start/end fixed).
+/trip → stop order optimization (keeps first/last fixed)
 
-Schedule builder: Combines drive times + stay durations to compute arrival/departure timestamps.
+Schedule builder
+Combines drive time and stay duration into arrival/departure timestamps.
 
-Map preview: Renders the route and stops in Streamlit using pydeck (Light/Dark themes, numeric labels centered).
+Map preview (pydeck)
+Light/Dark basemaps, centered numeric labels for each stop.
 
-Google Maps deep links: Creates one or more links for step-by-step navigation (handles waypoint limits).
+Google Maps deep links
+One or more links (auto-chunked to respect waypoint limits).
 
-Robust input parsing: Accepts simple sentences and bulk stop lists; time-only inputs assume Jakarta time (WIB).
+Robust input parsing
+Accepts free-form messages and bulk stop lists; time-only inputs assume WIB (Jakarta).
 
-Safety nets: If the LLM “forgets” to call tools, a fallback will compute the route when the plan is ready
+Safety nets
+If the LLM “forgets” to call tools, a fallback computes the route when the plan is ready.
 
-How it works
+🧩 How it works
+1) Chat + pre-parser
 
-Chat + pre-parser
-Your messages are pre-parsed to immediately set start/end, stops, mode, departure, theme, and OSRM base. This ensures the plan is up to date before the LLM responds.
+Your messages are pre-parsed to immediately apply:
+start/end/loop, stops, mode, depart time, theme, OSRM base.
+This keeps the plan in sync before the LLM responds.
 
-LLM tools
-The chatbot uses a set of tools (functions) to manage the plan and run routing:
+2) LLM tools
 
-set_start, set_end (or loop)
+The chatbot uses tools (functions) to manage the plan and run routing:
 
-add_stop, remove_stop, clear_stops, set_stops_bulk
+Category	Tools
+Plan points	set_start, set_end (loop supported)
+Stops	add_stop, remove_stop, clear_stops, set_stops_bulk
+Settings	set_mode, set_depart_at, set_optimize, set_osrm_base, set_map_theme
+Flow	get_next_question, show_plan
+Routing	compute, optimize_and_recompute
+3) Routing & optimization
 
-set_mode, set_depart_at, set_optimize
+Build ordered places: start → stops → end/loop.
 
-set_osrm_base, set_map_theme
+If optimization is on, call OSRM /trip (first/last fixed).
 
-compute, optimize_and_recompute
+Call OSRM /route for geometry + leg metrics.
 
-show_plan, get_next_question
+4) UI render
 
-Routing + optimization
+Itinerary table (arrival/departure per stop).
 
-Build the ordered place list (start → stops → end/loop).
+pydeck map (path + labeled markers 0,1,2…).
 
-If optimization is enabled, call OSRM /trip to compute an optimal order (preserving first/last).
-
-Call OSRM /route to get leg distances/durations + geometry for the map.
-
-UI render
-
-An itinerary table with arrival/departure per stop.
-
-A pydeck map with the path and numbered markers (0,1,2…).
-
-Google Maps links for navigation (chunked when needed).
-
-Usage
-
-You can chat naturally or follow a structured flow. The bot will guide you through:
-
-Start
-
-End or Loop
-
-Stops (with stay minutes)
-
-Mode (driving/walking/cycling)
-
-Depart time (10AM or time-only)
-
-Confirm
-
-Compute (and optionally Optimize)
-
-Example conversation
-You: Start: -6.175392, 106.827153
-You: Loop
-You: (Jakarta International Expo|-6.146358, 106.845811|120),
-     (Kota Tua|-6.135074, 106.813667|70),
-     (Grand Indonesia Mall|-6.196685, 106.822477|60)
-You: Driving
-You: 10:00 AM
-You: Compute
-
-
-The app then shows:
-
-A complete itinerary table (with arrival/departure times).
-
-A map preview of your route with numeric labels.
-
-One or more Google Maps links to navigate.
+Google Maps links (chunked when needed).
